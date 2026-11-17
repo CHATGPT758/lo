@@ -1,518 +1,447 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Festive Calendar — Christmas & Diwali</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Mountains+of+Christmas:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg-gradient: radial-gradient(circle at top, #1b4332 0%, #081c15 65%, #040d0a 100%);
-      --card-bg: rgba(13, 35, 26, 0.85);
-      --card-border: rgba(212, 175, 55, 0.35);
-      --accent-primary: #d62828;
-      --accent-secondary: #f4d35e;
-      --accent-glow: rgba(244, 211, 94, 0.45);
-      --text-main: #f8f9fa;
-      --text-muted: #b7e4c7;
-      --cell-bg: rgba(255, 255, 255, 0.04);
-      --cell-hover: rgba(214, 40, 40, 0.25);
-      --today-bg: linear-gradient(135deg, #d62828, #9b2226);
-      --today-ring: #f4d35e;
-      --title-font: 'Mountains of Christmas', cursive;
-    }
-
-    body[data-theme="diwali"] {
-      --bg-gradient: radial-gradient(circle at top, #3c096c 0%, #240046 55%, #10002b 100%);
-      --card-bg: rgba(36, 0, 70, 0.82);
-      --card-border: rgba(255, 183, 3, 0.45);
-      --accent-primary: #fb8500;
-      --accent-secondary: #ffb703;
-      --accent-glow: rgba(255, 183, 3, 0.55);
-      --text-main: #fff8e7;
-      --text-muted: #e0aaff;
-      --cell-bg: rgba(255, 183, 3, 0.06);
-      --cell-hover: rgba(251, 133, 0, 0.25);
-      --today-bg: linear-gradient(135deg, #fb8500, #d00000);
-      --today-ring: #ffd166;
-      --title-font: 'Cinzel Decorative', serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      min-height: 100vh;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      overflow-x: hidden;
-      transition: background 0.6s ease, color 0.4s ease;
-      position: relative;
-    }
-
-    /* Ambient floating particles */
-    #particles {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 0;
-    }
-
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.75;
-    }
-
-    @keyframes snowFall {
-      0% { transform: translateY(-10vh) translateX(0); opacity: 0; }
-      15% { opacity: 0.85; }
-      100% { transform: translateY(110vh) translateX(25px); opacity: 0.2; }
-    }
-
-    @keyframes sparkRise {
-      0% { transform: translateY(110vh) scale(0.6); opacity: 0; }
-      20% { opacity: 0.95; }
-      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
-    }
-
-    .calendar-wrapper {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 720px;
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      border: 1.5px solid var(--card-border);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 30px var(--accent-glow);
-      transition: all 0.5s ease;
-    }
-
-    /* Top bar: Title & Theme Toggle */
-    .top-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    .brand-title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .theme-icon {
-      font-size: 2rem;
-      filter: drop-shadow(0 0 10px var(--accent-glow));
-    }
-
-    .brand-title h1 {
-      font-family: var(--title-font);
-      font-size: 1.85rem;
-      letter-spacing: 0.5px;
-      color: var(--accent-secondary);
-      text-shadow: 0 2px 12px var(--accent-glow);
-    }
-
-    .theme-switcher {
-      display: flex;
-      background: rgba(0, 0, 0, 0.35);
-      padding: 4px;
-      border-radius: 999px;
-      border: 1px solid var(--card-border);
-    }
-
-    .theme-btn {
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .theme-btn.active {
-      background: var(--accent-primary);
-      color: #fff;
-      box-shadow: 0 0 14px var(--accent-glow);
-    }
-
-    /* Month Navigation */
-    .nav-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .month-year {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .nav-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-btn {
-      background: var(--cell-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      font-family: inherit;
-      font-weight: 600;
-      padding: 8px 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .nav-btn:hover {
-      background: var(--accent-primary);
-      border-color: var(--accent-secondary);
-      transform: translateY(-1px);
-    }
-
-    /* Calendar Grid */
-    .weekdays, .days-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-    }
-
-    .weekdays {
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--accent-secondary);
-    }
-
-    .day-cell {
-      aspect-ratio: 1 / 1;
-      background: var(--cell-bg);
-      border: 1px solid transparent;
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.25s ease;
-    }
-
-    .day-cell:hover:not(.empty) {
-      background: var(--cell-hover);
-      border-color: var(--accent-secondary);
-      transform: scale(1.04);
-    }
-
-    .day-cell.empty {
-      background: transparent;
-      cursor: default;
-    }
-
-    /* Highlighted Today's Date */
-    .day-cell.today {
-      background: var(--today-bg);
-      color: #ffffff;
-      border: 2px solid var(--today-ring);
-      box-shadow: 0 0 18px var(--accent-glow);
-      font-weight: 700;
-    }
-
-    .day-cell.today::after {
-      content: "TODAY";
-      font-size: 0.55rem;
-      letter-spacing: 0.6px;
-      margin-top: 2px;
-      color: var(--today-ring);
-      font-weight: 700;
-    }
-
-    /* Festive Holiday Marker */
-    .day-cell.holiday {
-      border-color: var(--accent-secondary);
-    }
-
-    .holiday-dot {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      font-size: 0.75rem;
-    }
-
-    /* Footer Info Bar */
-    .festival-banner {
-      margin-top: 20px;
-      padding: 14px 18px;
-      border-radius: 14px;
-      background: rgba(0, 0, 0, 0.28);
-      border: 1px solid var(--card-border);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
-
-    .festival-banner strong {
-      color: var(--accent-secondary);
-    }
-
-    .jump-btn {
-      background: transparent;
-      border: 1px solid var(--accent-secondary);
-      color: var(--accent-secondary);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .jump-btn:hover {
-      background: var(--accent-secondary);
-      color: #111;
-    }
-
-    @media (max-width: 520px) {
-      .calendar-wrapper { padding: 18px; }
-      .brand-title h1 { font-size: 1.45rem; }
-      .day-cell { border-radius: 10px; font-size: 0.9rem; }
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Festive Calendar — Christmas & Diwali</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Mountains+of+Christmas:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1b4332 0%, #081c15 65%, #040d0a 100%);
+      --card-bg: rgba(13, 35, 26, 0.85);
+      --card-border: rgba(212, 175, 55, 0.35);
+      --accent-primary: #d62828;
+      --accent-secondary: #f4d35e;
+      --accent-glow: rgba(244, 211, 94, 0.45);
+      --text-main: #f8f9fa;
+      --text-muted: #b7e4c7;
+      --cell-bg: rgba(255, 255, 255, 0.04);
+      --cell-hover: rgba(214, 40, 40, 0.25);
+      --today-bg: linear-gradient(135deg, #d62828, #9b2226);
+      --today-ring: #f4d35e;
+      --title-font: 'Mountains of Christmas', cursive;
+    }
+    body[data-theme="diwali"] {
+      --bg-gradient: radial-gradient(circle at top, #3c096c 0%, #240046 55%, #10002b 100%);
+      --card-bg: rgba(36, 0, 70, 0.82);
+      --card-border: rgba(255, 183, 3, 0.45);
+      --accent-primary: #fb8500;
+      --accent-secondary: #ffb703;
+      --accent-glow: rgba(255, 183, 3, 0.55);
+      --text-main: #fff8e7;
+      --text-muted: #e0aaff;
+      --cell-bg: rgba(255, 183, 3, 0.06);
+      --cell-hover: rgba(251, 133, 0, 0.25);
+      --today-bg: linear-gradient(135deg, #fb8500, #d00000);
+      --today-ring: #ffd166;
+      --title-font: 'Cinzel Decorative', serif;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+      transition: background 0.6s ease, color 0.4s ease;
+      position: relative;
+    }
+    #particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.75;
+    }
+    @keyframes snowFall {
+      0% { transform: translateY(-10vh) translateX(0); opacity: 0; }
+      15% { opacity: 0.85; }
+      100% { transform: translateY(110vh) translateX(25px); opacity: 0.2; }
+    }
+    @keyframes sparkRise {
+      0% { transform: translateY(110vh) scale(0.6); opacity: 0; }
+      20% { opacity: 0.95; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+    }
+    .calendar-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 720px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1.5px solid var(--card-border);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 30px var(--accent-glow);
+      transition: all 0.5s ease;
+    }
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .theme-icon {
+      font-size: 2rem;
+      filter: drop-shadow(0 0 10px var(--accent-glow));
+    }
+    .brand-title h1 {
+      font-family: var(--title-font);
+      font-size: 1.85rem;
+      letter-spacing: 0.5px;
+      color: var(--accent-secondary);
+      text-shadow: 0 2px 12px var(--accent-glow);
+    }
+    .theme-switcher {
+      display: flex;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid var(--card-border);
+    }
+    .theme-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .theme-btn.active {
+      background: var(--accent-primary);
+      color: #fff;
+      box-shadow: 0 0 14px var(--accent-glow);
+    }
+    .nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .month-year {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-btn {
+      background: var(--cell-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-family: inherit;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .nav-btn:hover {
+      background: var(--accent-primary);
+      border-color: var(--accent-secondary);
+      transform: translateY(-1px);
+    }
+    .weekdays, .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .weekdays {
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-secondary);
+    }
+    .day-cell {
+      aspect-ratio: 1 / 1;
+      background: var(--cell-bg);
+      border: 1px solid transparent;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .day-cell:hover:not(.empty) {
+      background: var(--cell-hover);
+      border-color: var(--accent-secondary);
+      transform: scale(1.04);
+    }
+    .day-cell.empty {
+      background: transparent;
+      cursor: default;
+    }
+    .day-cell.today {
+      background: var(--today-bg);
+      color: #ffffff;
+      border: 2px solid var(--today-ring);
+      box-shadow: 0 0 18px var(--accent-glow);
+      font-weight: 700;
+    }
+    .day-cell.today::after {
+      content: "TODAY";
+      font-size: 0.55rem;
+      letter-spacing: 0.6px;
+      margin-top: 2px;
+      color: var(--today-ring);
+      font-weight: 700;
+    }
+    .day-cell.holiday {
+      border-color: var(--accent-secondary);
+    }
+    .holiday-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: 0.75rem;
+    }
+    .festival-banner {
+      margin-top: 20px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid var(--card-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .festival-banner strong {
+      color: var(--accent-secondary);
+    }
+    .jump-btn {
+      background: transparent;
+      border: 1px solid var(--accent-secondary);
+      color: var(--accent-secondary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .jump-btn:hover {
+      background: var(--accent-secondary);
+      color: #111;
+    }
+    @media (max-width: 520px) {
+      .calendar-wrapper { padding: 18px; }
+      .brand-title h1 { font-size: 1.45rem; }
+      .day-cell { border-radius: 10px; font-size: 0.9rem; }
+    }
+  </style>
 </head>
 <body data-theme="christmas">
-  <div id="particles"></div>
-
-  <main class="calendar-wrapper">
-    <header class="top-bar">
-      <div class="brand-title">
-        <span class="theme-icon" id="themeIcon">🎄</span>
-        <h1 id="themeHeading">Festive Calendar</h1>
-      </div>
-
-      <div class="theme-switcher" role="group" aria-label="Theme Switcher">
-        <button class="theme-btn active" id="btnChristmas" onclick="setTheme('christmas')">🎄 Christmas</button>
-        <button class="theme-btn" id="btnDiwali" onclick="setTheme('diwali')">🪔 Diwali</button>
-      </div>
-    </header>
-
-    <section class="nav-header">
-      <h2 class="month-year" id="monthYearLabel">November 2026</h2>
-      <div class="nav-controls">
-        <button class="nav-btn" id="prevBtn" aria-label="Previous Month">◀ Prev</button>
-        <button class="nav-btn" id="todayBtn">Today</button>
-        <button class="nav-btn" id="nextBtn" aria-label="Next Month">Next ▶</button>
-      </div>
-    </section>
-
-    <div class="weekdays">
-      <div>Sun</div>
-      <div>Mon</div>
-      <div>Tue</div>
-      <div>Wed</div>
-      <div>Thu</div>
-      <div>Fri</div>
-      <div>Sat</div>
-    </div>
-
-    <div class="days-grid" id="daysGrid"></div>
-
-    <footer class="festival-banner">
-      <span id="statusMessage">✨ Click any highlighted date for festive details.</span>
-      <button class="jump-btn" id="jumpFestivalBtn">Jump to Holiday</button>
-    </footer>
-  </main>
-
-  <script>
-    const today = new Date();
-    let currentMonth = today.getMonth();
-    let currentYear = today.getFullYear();
-    let activeTheme = 'christmas';
-
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-
-    const holidays = {
-      christmas: {
-        "12-24": { icon: "🔔", label: "Christmas Eve" },
-        "12-25": { icon: "🎅", label: "Christmas Day" },
-        "12-31": { icon: "🥂", label: "New Year's Eve" }
-      },
-      diwali: {
-        "11-6":  { icon: "✨", label: "Dhanteras" },
-        "11-8":  { icon: "🪔", label: "Diwali — Festival of Lights" },
-        "11-9":  { icon: "🍬", label: "Govardhan Puja" },
-        "11-10": { icon: "💛", label: "Bhai Dooj" }
-      }
-    };
-
-    const daysGrid = document.getElementById("daysGrid");
-    const monthYearLabel = document.getElementById("monthYearLabel");
-    const statusMessage = document.getElementById("statusMessage");
-    const jumpFestivalBtn = document.getElementById("jumpFestivalBtn");
-
-    function renderCalendar() {
-      daysGrid.innerHTML = "";
-      monthYearLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-
-      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-      const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
-      const themeHolidays = holidays[activeTheme];
-
-      for (let i = 0; i < firstDayIndex; i++) {
-        const emptyCell = document.createElement("div");
-        emptyCell.className = "day-cell empty";
-        daysGrid.appendChild(emptyCell);
-      }
-
-      for (let day = 1; day <= totalDays; day++) {
-        const cell = document.createElement("div");
-        cell.className = "day-cell";
-        cell.textContent = day;
-
-        const isToday =
-          day === today.getDate() &&
-          currentMonth === today.getMonth() &&
-          currentYear === today.getFullYear();
-
-        if (isToday) {
-          cell.classList.add("today");
-        }
-
-        const key = `${currentMonth + 1}-${day}`;
-        if (themeHolidays[key]) {
-          cell.classList.add("holiday");
-          const badge = document.createElement("span");
-          badge.className = "holiday-dot";
-          badge.textContent = themeHolidays[key].icon;
-          cell.appendChild(badge);
-        }
-
-        cell.addEventListener("click", () => {
-          const dateStr = `${monthNames[currentMonth]} ${day}, ${currentYear}`;
-          if (themeHolidays[key]) {
-            statusMessage.innerHTML = `${themeHolidays[key].icon} <strong>${dateStr}:</strong> ${themeHolidays[key].label}`;
-          } else if (isToday) {
-            statusMessage.innerHTML = `📅 <strong>${dateStr}:</strong> Today's Date`;
-          } else {
-            statusMessage.innerHTML = `🗓️ Selected: <strong>${dateStr}</strong>`;
-          }
-        });
-
-        daysGrid.appendChild(cell);
-      }
-    }
-
-    function setTheme(theme) {
-      activeTheme = theme;
-      document.body.setAttribute("data-theme", theme);
-
-      document.getElementById("btnChristmas").classList.toggle("active", theme === "christmas");
-      document.getElementById("btnDiwali").classList.toggle("active", theme === "diwali");
-      document.getElementById("themeIcon").textContent = theme === "christmas" ? "🎄" : "🪔";
-      jumpFestivalBtn.textContent = theme === "christmas" ? "Jump to Christmas" : "Jump to Diwali";
-
-      createParticles();
-      renderCalendar();
-    }
-
-    function createParticles() {
-      const container = document.getElementById("particles");
-      container.innerHTML = "";
-      const isChristmas = activeTheme === "christmas";
-
-      for (let i = 0; i < 28; i++) {
-        const p = document.createElement("div");
-        p.className = "particle";
-        const size = Math.random() * 5 + 3;
-        p.style.width = `${size}px`;
-        p.style.height = `${size}px`;
-        p.style.left = `${Math.random() * 100}vw`;
-        p.style.background = isChristmas ? "#ffffff" : "#ffb703";
-        p.style.boxShadow = isChristmas ? "0 0 6px #fff" : "0 0 10px #fb8500";
-        p.style.animation = `${isChristmas ? "snowFall" : "sparkRise"} ${Math.random() * 6 + 5}s linear infinite`;
-        p.style.animationDelay = `${Math.random() * 5}s`;
-        container.appendChild(p);
-      }
-    }
-
-    document.getElementById("prevBtn").addEventListener("click", () => {
-      currentMonth--;
-      if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-      }
-      renderCalendar();
-    });
-
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      currentMonth++;
-      if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
-      renderCalendar();
-    });
-
-    document.getElementById("todayBtn").addEventListener("click", () => {
-      currentMonth = today.getMonth();
-      currentYear = today.getFullYear();
-      renderCalendar();
-    });
-
-    jumpFestivalBtn.addEventListener("click", () => {
-      currentYear = today.getFullYear();
-      currentMonth = activeTheme === "christmas" ? 11 : 10; // Dec for Christmas, Nov for Diwali
-      renderCalendar();
-      statusMessage.innerHTML =
-        activeTheme === "christmas"
-          ? "🎄 Showing <strong>December</strong> — Christmas Eve & Christmas Day!"
-          : "🪔 Showing <strong>November</strong> — Diwali Festival of Lights!";
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft") document.getElementById("prevBtn").click();
-      if (e.key === "ArrowRight") document.getElementById("nextBtn").click();
-    });
-
-    setTheme("christmas");
-  </script>
+  <div id="particles"></div>
+  <main class="calendar-wrapper">
+    <header class="top-bar">
+      <div class="brand-title">
+        <span class="theme-icon" id="themeIcon">🎄</span>
+        <h1 id="themeHeading">Festive Calendar</h1>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Theme Switcher">
+        <button class="theme-btn active" id="btnChristmas" onclick="setTheme('christmas')">🎄 Christmas</button>
+        <button class="theme-btn" id="btnDiwali" onclick="setTheme('diwali')">🪔 Diwali</button>
+      </div>
+    </header>
+    <section class="nav-header">
+      <h2 class="month-year" id="monthYearLabel">November 2026</h2>
+      <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" aria-label="Previous Month">◀ Prev</button>
+        <button class="nav-btn" id="todayBtn">Today</button>
+        <button class="nav-btn" id="nextBtn" aria-label="Next Month">Next ▶</button>
+      </div>
+    </section>
+    <div class="weekdays">
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thu</div>
+      <div>Fri</div>
+      <div>Sat</div>
+    </div>
+    <div class="days-grid" id="daysGrid"></div>
+    <footer class="festival-banner">
+      <span id="statusMessage">✨ Click any highlighted date for festive details.</span>
+      <button class="jump-btn" id="jumpFestivalBtn">Jump to Holiday</button>
+    </footer>
+  </main>
+  <script>
+    const today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+    let activeTheme = 'christmas';
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const holidays = {
+      christmas: {
+        "12-24": { icon: "🔔", label: "Christmas Eve" },
+        "12-25": { icon: "🎅", label: "Christmas Day" },
+        "12-31": { icon: "🥂", label: "New Year's Eve" }
+      },
+      diwali: {
+        "11-6":  { icon: "✨", label: "Dhanteras" },
+        "11-8":  { icon: "🪔", label: "Diwali — Festival of Lights" },
+        "11-9":  { icon: "🍬", label: "Govardhan Puja" },
+        "11-10": { icon: "💛", label: "Bhai Dooj" }
+      }
+    };
+    const daysGrid = document.getElementById("daysGrid");
+    const monthYearLabel = document.getElementById("monthYearLabel");
+    const statusMessage = document.getElementById("statusMessage");
+    const jumpFestivalBtn = document.getElementById("jumpFestivalBtn");
+    function renderCalendar() {
+      daysGrid.innerHTML = "";
+      monthYearLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+      const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const themeHolidays = holidays[activeTheme];
+      for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement("div");
+        emptyCell.className = "day-cell empty";
+        daysGrid.appendChild(emptyCell);
+      }
+      for (let day = 1; day <= totalDays; day++) {
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        cell.textContent = day;
+        const isToday =
+          day === today.getDate() &&
+          currentMonth === today.getMonth() &&
+          currentYear === today.getFullYear();
+        if (isToday) {
+          cell.classList.add("today");
+        }
+        const key = `${currentMonth + 1}-${day}`;
+        if (themeHolidays[key]) {
+          cell.classList.add("holiday");
+          const badge = document.createElement("span");
+          badge.className = "holiday-dot";
+          badge.textContent = themeHolidays[key].icon;
+          cell.appendChild(badge);
+        }
+        cell.addEventListener("click", () => {
+          const dateStr = `${monthNames[currentMonth]} ${day}, ${currentYear}`;
+          if (themeHolidays[key]) {
+            statusMessage.innerHTML = `${themeHolidays[key].icon} <strong>${dateStr}:</strong> ${themeHolidays[key].label}`;
+          } else if (isToday) {
+            statusMessage.innerHTML = `📅 <strong>${dateStr}:</strong> Today's Date`;
+          } else {
+            statusMessage.innerHTML = `🗓️ Selected: <strong>${dateStr}</strong>`;
+          }
+        });
+        daysGrid.appendChild(cell);
+      }
+    }
+    function setTheme(theme) {
+      activeTheme = theme;
+      document.body.setAttribute("data-theme", theme);
+      document.getElementById("btnChristmas").classList.toggle("active", theme === "christmas");
+      document.getElementById("btnDiwali").classList.toggle("active", theme === "diwali");
+      document.getElementById("themeIcon").textContent = theme === "christmas" ? "🎄" : "🪔";
+      jumpFestivalBtn.textContent = theme === "christmas" ? "Jump to Christmas" : "Jump to Diwali";
+      createParticles();
+      renderCalendar();
+    }
+    function createParticles() {
+      const container = document.getElementById("particles");
+      container.innerHTML = "";
+      const isChristmas = activeTheme === "christmas";
+      for (let i = 0; i < 28; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        const size = Math.random() * 5 + 3;
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        p.style.left = `${Math.random() * 100}vw`;
+        p.style.background = isChristmas ? "#ffffff" : "#ffb703";
+        p.style.boxShadow = isChristmas ? "0 0 6px #fff" : "0 0 10px #fb8500";
+        p.style.animation = `${isChristmas ? "snowFall" : "sparkRise"} ${Math.random() * 6 + 5}s linear infinite`;
+        p.style.animationDelay = `${Math.random() * 5}s`;
+        container.appendChild(p);
+      }
+    }
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    });
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    });
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      currentMonth = today.getMonth();
+      currentYear = today.getFullYear();
+      renderCalendar();
+    });
+    jumpFestivalBtn.addEventListener("click", () => {
+      currentYear = today.getFullYear();
+      currentMonth = activeTheme === "christmas" ? 11 : 10;
+      renderCalendar();
+      statusMessage.innerHTML =
+        activeTheme === "christmas"
+          ? "🎄 Showing <strong>December</strong> — Christmas Eve & Christmas Day!"
+          : "🪔 Showing <strong>November</strong> — Diwali Festival of Lights!";
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") document.getElementById("prevBtn").click();
+      if (e.key === "ArrowRight") document.getElementById("nextBtn").click();
+    });
+    setTheme('christmas');
+  </script>
 </body>
 </html>
